@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/Spam_Email_Page.css" /> <!-- Assuming the CSS filename is style.css -->
+    <title>Spam Content Checker | ShieldMail</title>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="#" style="font-weight: bold;">ShieldMail</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+<div class="container">
+    <div class="main-content">
+        <h1>Check Your Email for Spam</h1>
+        <p>Paste the content of a suspicious email below to check if it's spam. Our advanced algorithms analyze the text to detect potential threats and keep your inbox safe.</p>
+        <textarea id="emailContent" placeholder="Paste email content here" rows="10" style="width:100%; margin-top:20px;"></textarea>
+        <button class="cta-button" onclick="checkForSpam()">Check for Spam</button>
+        <div id="results" style="margin-top:20px;"></div>
+    </div>
+</div>
+
+<script>
+    function checkForSpam() {
+        // Placeholder for spam check functionality
+        alert('Functionality to check for spam will be implemented here.');
+    }
+</script>
+
+</body>
+</html>

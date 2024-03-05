@@ -1,0 +1,34 @@
+/* Update your existing CSS file (/static/Home_Page.css) with the following styles */
+
+/* Add specific styles for the history dashboard */
+.container {
+    padding: 20px;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.history-item {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    padding: 1em;
+    margin: 1em 0;
+    max-width: 600px;
+    width: 90%;
+}
+
+.email, .link, .status {
+    margin-bottom: 0.5em;
+}
+
+.status {
+    font-weight: bold;
+}
+
+.spam {
+    color: red;
+}

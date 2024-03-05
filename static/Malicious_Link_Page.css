@@ -1,0 +1,148 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    background-color: #2c3e50;
+    overflow: hidden;
+    font-size: 18px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 999;
+}
+
+.navbar a {
+    float: left;
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.navbar a:hover {
+    background-color: #3498db;
+}
+
+.container {
+    flex: 1;
+    padding: 60px 20px 20px; /* adjusted padding to account for navbar */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.main-content {
+    background-color: white;
+    padding: 40px; /* more padding for a better boxed layout */
+    border-radius: 10px; /* increased border-radius */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* deeper shadow for a pop effect */
+    width: 100%;
+    max-width: 900px;
+    margin-top: -100px; /* offsetting for a layered effect */
+    position: relative;
+    z-index: 100; /* ensuring content is above the background */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: scale(0.98); /* initial scale set for animation */
+    opacity: 0;
+    animation: fadeInScale 0.8s 0.5s ease-out forwards;
+}
+
+/* Improved Button and Input Styles */
+.cta-button {
+    background-color: #3498db;
+    color: white;
+    padding: 12px 25px; /* bigger for a more touch-friendly approach */
+    font-size: 16px; /* larger font size */
+    text-decoration: none;
+    border-radius: 25px; /* more pronounced rounded corners for the button */
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    font-weight: bold; /* making the text pop more */
+    letter-spacing: 1px; /* subtle adjustment for typographic refinement */
+}
+
+.cta-button:hover, .cta-button:focus {
+    background-color: #2980b9;
+    transform: translateY(-3px); /* subtle lift effect on hover/focus */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* increased shadow for depth */
+}
+
+.link-input {
+    width: 100%;
+    max-width: 500px; /* setting a max-width for larger viewports */
+    padding: 15px;
+    margin-bottom: 20px;
+    border: none; /* removing border */
+    background: #ecf0f1; /* light grey background to differentiate input */
+    border-radius: 25px; /* matching border-radius with button */
+    transition: box-shadow 0.3s;
+    outline: none;
+    font-size: 16px; /* larger font size for readability */
+}
+
+.link-input:focus {
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.5); /* glow effect on focus */
+}
+
+/* Animations */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Content fade-in animation */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 1s ease-in forwards;
+    animation-delay: calc(var(--animation-order) * 0.1s + 0.5s); /* adjusted timing */
+}
+
+.container h1 { --animation-order: 1; }
+.container p { --animation-order: 2; }
+.container .link-input { --animation-order: 3; }
+.container .cta-button { --animation-order: 4; }
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .navbar a {
+        float: none;
+        display: block;
+        text-align: left;
+    }
+    .navbar {
+        text-align: center;
+    }
+    .main-content, .link-input {
+        width: 90%;
+    }
+    .cta-button, .link-input {
+        font-size: 14px;
+    }
+}

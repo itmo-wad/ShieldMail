@@ -1,0 +1,120 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    text-align: center;
+    padding-top: 60px; /* To avoid overlap with the navbar */
+}
+
+.navbar {
+    background-color: #2c3e50;
+    overflow: hidden;
+    font-size: 18px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 10;
+}
+
+.navbar a {
+    float: left;
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.navbar a:hover {
+    background-color: #3498db;
+}
+
+.profile-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    padding: 2em;
+    max-width: 600px;
+    width: 90%;
+    margin: 1em auto;
+    transform: scale(0.95); /* Start slightly smaller */
+    opacity: 0;
+    animation: scaleIn 0.5s ease-out forwards, fadeInUp 0.5s ease-out forwards;
+}
+
+.profile-header {
+    color: #333;
+    font-size: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.profile-info {
+    text-align: left;
+    margin-top: 1em;
+    line-height: 1.6;
+    color: #666;
+}
+
+.profile-info div {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 5px;
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.profile-info div:hover {
+    background-color: #efefef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: scale(1.03); /* Slightly scale up the div */
+    cursor: pointer; /* Change cursor to indicate it's interactive */
+}
+
+.profile-info div span {
+    font-weight: 600;
+}
+
+/* Keyframes for animation */
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Slide-in animation for each info block */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Individual info divs slide in */
+.profile-info div {
+    animation: slideIn 0.5s forwards;
+    will-change: transform, opacity;
+}
+
+.profile-info div:nth-child(1) { animation-delay: 0.3s; }
+.profile-info div:nth-child(2) { animation-delay: 0.4s; }
+.profile-info div:nth-child(3) { animation-delay: 0.5s; }
+.profile-info div:nth-child(4) { animation-delay: 0.6s; }
+.profile-info div:nth-child(5) { animation-delay: 0.7s; }
+.profile-info div:nth-child(6) { animation-delay: 0.8s; }
