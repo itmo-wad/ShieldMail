@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/static/Login_Page.css" />
+
+<title>ShieldMail Login</title>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="#" style="font-weight: bold;">ShieldMail</a>
+    <a href="{{ url_for('core.dashboard') }}">Home</a>
+    <a href="#">About Us</a>
+    <a href="#">Help</a>
+    <a href="#">Get Started</a>
+</div>
+
+<div class="login-container">
+    <div class="card">
+        <h2>Welcome Back!</h2>
+        <form action="/login" method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.csrf_token }}
+            <div class="form-group">
+                {{ form.email() }}
+                {{ form.email.label }}
+            </div>
+            <div class="form-group">
+                {{ form.password() }}
+                {{ form.password.label }}
+            </div>
+            {{ form.submit() }}
+        </form>
+        <div class="errors">
+            {% if form.email.errors %}
+            <p>Invalid email or password</p>
+            {% endif %}
+            {% with messages = get_flashed_messages() %}
+            <ul class="errors">
+                {% for error in messages %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endwith %}
+        </div>
+        <p>Don't have an account? <a href="{{ url_for('auth.signup') }}">Sign Up</a></p>
+        <a href="{{ url_for('auth.googleLogin') }}">Sign in with Google</a>
+    </div>
+</div>
+
+</body>
+</html>

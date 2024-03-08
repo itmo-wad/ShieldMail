@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/static/Home_Page.css" />
+<title>ShieldMail Homepage</title>
+
+</head>
+<body>
+
+<div class="navbar">
+    <a href="#" style="font-weight: bold;">ShieldMail</a>
+    <a href="{{ url_for('home') }}">Home</a>
+    <a href="#">About Us</a>
+    <a href="#">Help</a>
+    <a href="#">Get Started</a>
+</div>
+
+<div class="container">
+    <div class="main-content">
+        <h1>Welcome to ShieldMail: Your Phishing Guardian!</h1>
+        <p>In the online world, some people who aren't big tech experts can be tricked by sneaky email scams. But fear not! ShieldMail is here to help, like an online superhero. It guides you to spot which emails are trustworthy and which ones might be trying to play tricks on you.</p>
+        <h2>How it works?</h2>
+        <p>It uses smart technology to quickly check if your emails might be tricky scams (phishing). Then, it gives them a safety rating to make sure your inbox stays safe and secure.</p>
+        <p>Receive instant reports with actionable steps to take against phishing threats!</p>
+        
+                <div class="button-container">
+                    <button class="cta-button" onclick='location.href="/login"'>Log In</button>
+                    <button class="cta-button" onclick='location.href="/signup"'>Sign Up</button>
+            
+        </div>
+        
+    </div>
+</div>
+
+</body>
+</html>

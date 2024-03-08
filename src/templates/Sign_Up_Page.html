@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/static/Sign_Up_Page.css" />
+<title>ShieldMail Signup</title>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="#" style="font-weight: bold;">ShieldMail</a>
+    <a href="{{ url_for('core.dashboard') }}">Home</a>
+    <a href="#">About Us</a>
+    <a href="#">Help</a>
+    <a href="#">Get Started</a>
+</div>
+
+<div class="signup-container">
+    <div class="card">
+        <h2>Create Account</h2>
+        <form action="/signup" method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.csrf_token }}
+            <div class="form-group">
+                {{ form.firstname() }}
+                {{ form.firstname.label }}
+            </div>
+            <div class="form-group">
+                {{ form.lastname() }}
+                {{ form.lastname.label }}
+            </div>
+            <div class="form-group">
+                {{ form.email() }}
+                {{ form.email.label }}
+            </div>
+            <div class="form-group">
+                {{ form.password() }}
+                {{ form.password.label }}
+            </div>
+            <div class="form-group">
+                {{ form.confirm_password() }}
+                {{ form.confirm_password.label }}
+            </div>
+            {{ form.submit() }}
+        </form>
+        <div class="errors">
+            {% if form.email.errors %}
+            <ul class="errors">
+                {% for error in form.email.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% if form.confirm_password.errors %}
+            <p>Passwords do not match</p>
+            {% endif %}
+            {% with messages = get_flashed_messages() %}
+            <ul class="errors">
+                {% for error in messages %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endwith %}
+        </div>
+        <p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign In</a></p>
+    </div>
+</div>
+
+</body>
+</html>
