@@ -8,3 +8,5 @@ Flask-WTF == 1.2.1
 email-validator == 2.1.1
 Flask-Bcrypt == 1.0.1
 bleach == 6.1.0
+textstat == 0.7.3
+language_tool_python == 2.7.1

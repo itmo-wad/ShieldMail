@@ -4,7 +4,10 @@ from bson.objectid import ObjectId
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField, SubmitField
 from wtforms.validators import DataRequired, Length
+from ShieldMail.src.models.mailanalyzer import EmailAnalyzer
+from ShieldMail.src.main import GOOGLE_API_KEY
 from main import db
+import os
 import re
 import requests
 import bleach
@@ -16,38 +19,6 @@ core = Blueprint("core", __name__)
 class SpamMail(FlaskForm):
     content = TextAreaField('Content', validators=[DataRequired(), Length(max=5000)])
     submit = SubmitField('Submit')
-
-def extract_urls(text):
-    url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
-    urls = re.findall(url_pattern, text)
-    return urls
-
-def spam_email_detector(content):
-    host = "https://email-spam-detector.p.rapidapi.com/api/email_spam_detector"
-
-    payload = {"text": content}
-
-    headers = {
-	"content-type": "application/json",
-	"X-RapidAPI-Key": "2cfb47ebc9msh9fb2b632b70016dp1dad0ajsne31a2db9d539",
-	"X-RapidAPI-Host": "email-spam-detector.p.rapidapi.com"
-    }
-
-    response = requests.post(host, json=payload, headers=headers)
-    return response.json()
-
-def malicious_url_detector(url):
-    host = "https://exerra-phishing-check.p.rapidapi.com/"
-
-    payload = {"url": url}
-
-    headers = {
-        "X-RapidAPI-Key": "2cfb47ebc9msh9fb2b632b70016dp1dad0ajsne31a2db9d539",
-        "X-RapidAPI-Host": "exerra-phishing-check.p.rapidapi.com"
-    }
-
-    response = requests.get(host, headers=headers, params=payload)
-    return response.json()
 
 @core.route("/dashboard")
 def dashboard():
@@ -89,38 +60,37 @@ def spamEmail():
         user_id = user['_id']
 
         content = form.content.data
+        email_analyzer = EmailAnalyzer(GOOGLE_API_KEY)
 
-        # Insert urls to database
-        urls = extract_urls(content)
+        urls = email_analyzer.included_urls(content)
 
         url_ids = []
         for url in urls:
-            output = malicious_url_detector(url)
+            isMalicious = email_analyzer.detect_phishing(url)
             
-            print(output)
-            print(output['data'])
-            if 'isScam' not in output['data'] or output['data']['isScam'] == False:
-                isMalicious = False
-            else:
-                isMalicious = True
-            
-            url = db.urls.insert_one({
+            url_to_add = db.urls.insert_one({
                 'url': url,
                 'isMalicious': isMalicious,
                 'owner': ObjectId(user_id),
                 'createdAt': datetime.now()
             })
 
-            url_ids.append(url.inserted_id)
+            url_ids.append(url_to_add.inserted_id)
 
-        # Insert email to database
         sanitized_content = bleach.clean(content)
 
-        isSpam = float(spam_email_detector(content)['sentiment']['POS'])
-
+        toxicity_score, spam_score, incoherent_score = email_analyzer.analyze_text_with_perspective(sanitized_content)
         email = db.emails.insert_one({
             'content': sanitized_content,
-            'isSpam': isSpam,
+            'phishingDetected': email_analyzer.detect_phishing(sanitized_content),
+            'spamDetected': email_analyzer.detect_spam(sanitized_content),
+            'lexicalDiversity': email_analyzer.lexical_diversity(sanitized_content),
+            'grammarIssues': email_analyzer.grammar_checker(sanitized_content),
+            'fleschReadingEase': email_analyzer.flesch_reading_ease(sanitized_content),
+            'toxicityScore': toxicity_score,
+            'spamScore': spam_score,
+            'incoherentScore': incoherent_score,
+            'riskScore': email_analyzer.calculate_risk_score(sanitized_content),
             'owner': ObjectId(user_id),
             'urls': url_ids,
             'createdAt': datetime.now()

@@ -22,6 +22,8 @@ app.secret_key = os.environ.get('SECRET_KEY')
 
 oauth = OAuth(app)
 
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+
 oauth.register('shieldmail',
                client_id=os.environ.get('OAUTH2_CLIENT_ID'),
                client_secret=os.environ.get('OAUTH2_CLIENT_SECRET'),
