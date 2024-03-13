@@ -18,7 +18,7 @@ db = client[database_name]
 
 bcrypt = Bcrypt(app)
 
-app.secret_key = os.environ.get('SECRET_KEY')
+app.secret_key = os.urandom(24)
 
 oauth = OAuth(app)
 
@@ -27,6 +27,8 @@ GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
 oauth.register('shieldmail',
                client_id=os.environ.get('OAUTH2_CLIENT_ID'),
                client_secret=os.environ.get('OAUTH2_CLIENT_SECRET'),
+               access_token_url='https://oauth2.googleapis.com/token',
+               authorize_url='https://accounts.google.com/o/oauth2/auth',
                server_metadata_url=os.environ.get('OAUTH2_META_URL'),
                client_kwargs={
                    'scope': 'openid profile email'})

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/Spam_Email_Page.css" /> <!-- Assuming the CSS filename is style.css -->
+    <link rel="stylesheet" href="/static/Spam_Email_Page.css" />
     <title>Spam Content Checker | ShieldMail</title>
 </head>
 <body>
@@ -18,41 +18,78 @@
     <div class="main-content">
         <h1>Check Your Email for Spam</h1>
         <p>Paste the content of a suspicious email below to check if it's spam. Our advanced algorithms analyze the text to detect potential threats and keep your inbox safe.</p>
-        <!-- <textarea id="emailContent" placeholder="Paste email content here" rows="10" style="width:100%; margin-top:20px;"></textarea>
-        <button class="cta-button" onclick="checkForSpam()">Check for Spam</button> -->
 
-        <form action="/spam-email" method="POST">
+        <form id="formForMessage" action="/spam-email" method="POST">
             {{ form.hidden_tag() }}
-            <p>{{ form.content.label }}<br>{{ form.content() }}</p>
+            <p id="contentOfMessage">{{ form.content.label }}<br>{{ form.content() }}</p>
             <p>{{ form.submit() }}</p>
         </form>
-
-        <div id="results" style="margin-top:20px;">
-        {{ isSpam }}
-        {% if urls %}
-        <ul>
-            {% for url in urls %}
-                <li>url: {{ url }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        {% if urls %}
-        <ul>
-            {% for isMalicious in isMaliciouses %}
-                <li>result of malicious url: {{ isMalicious }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        </div>
     </div>
 </div>
+<div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalContent">
+            </div>
+        </div>
+    </div>
+</body>
+
 
 <script>
-    function checkForSpam() {
-        // Placeholder for spam check functionality
-        alert('Functionality to check for spam will be implemented here.');
-    }
+document.getElementById('formForMessage').addEventListener('submit', function (event) {
+        event.preventDefault();
+        showLoadingIndicator();
+        const formData = new FormData(event.target)
+        openModal(formData);
+    });
+function showLoadingIndicator() {
+    document.getElementById('modalContent').innerHTML = 'Loading...';
+    document.getElementById('myModal').style.display = 'flex';
+}
+
+function openModal(formData) {
+            fetch('/spam-email', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const htmlContent = `
+            <div class="modal-title">Email Analysis Report</div>
+            <div class="metric-row">
+                <div class="metric-rectangle">Risk Score: ${data.riskScore}</div>
+                <div class="metric-rectangle">Phishing Detected: ${data.phishingDetected}</div>
+                <div class="metric-rectangle">Spam Detected: ${data.spamDetected}</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric">Lexical Diversity: ${data.lexicalDiversity}</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric">Grammar Issues: ${data.grammarIssues}</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric">Flesch Reading Ease: ${data.fleschReadingEase}</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric">Toxicity Score: ${data.toxicityScore}</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric">Spam Score: ${data.spamScore}</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric">Incoherent Score: ${data.incoherentScore}</div>
+            </div>
+        `;
+                    document.getElementById('modalContent').innerHTML = htmlContent;
+                    document.getElementById('myModal').style.display = 'flex';
+                });
+        }
+
+function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
 </script>
 
-</body>
+
 </html>

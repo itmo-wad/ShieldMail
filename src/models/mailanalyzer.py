@@ -2,22 +2,24 @@ import re
 import language_tool_python
 import textstat
 import requests
+import bleach
 
 class EmailAnalyzer:
-    def __init__(self, perspective_api_key):
+    def __init__(self, perspective_api_key,text):
         self.tool = language_tool_python.LanguageTool('auto')
         self.api_key = perspective_api_key
+        self.message = bleach.clean(text)
 
-    def included_urls(self,text):
+    def included_urls(self):
         url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
-        urls = re.findall(url_pattern, text)
+        urls = re.findall(url_pattern, self.message)
         return urls
 
-    def detect_phishing(self,text):
+    def detect_phishing(self):
         endpoint = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
         api_url = f"{endpoint}?key={self.api_key}"
 
-        for url in self.included_urls(text):
+        for url in self.included_urls():
             request_body = {
                 "client": {
                     "clientId": "wad-itmo-shieldmail",
@@ -39,12 +41,12 @@ class EmailAnalyzer:
 
         return False
 
-    def detect_spam(self,text):
+    def detect_spam(self):
         endpoint = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze"
 
         params = {"key": self.api_key}
         data = {
-            "comment": {"text": text},
+            "comment": {"text": self.message},
             "languages": ["en"],
             "requestedAttributes": {
                 "SPAM": {},
@@ -57,41 +59,38 @@ class EmailAnalyzer:
         spam_score = results["attributeScores"]["SPAM"]["summaryScore"]["value"]
         return True if (spam_score > 0.7) else False
 
-    def lexical_diversity(self, text):
-        nosign_text = re.sub(r'[^\w\s]', '', text)
+    def lexical_diversity(self):
+        nosign_text = re.sub(r'[^\w\s]', '', self.message)
         words = nosign_text.lower().split()
         unique_words = set(words)
         lexical_diversity = len(unique_words) / len(words)
-        return lexical_diversity
+        return round(lexical_diversity,2)
 
-    def grammar_checker(self, text):
-        grammar_issues = self.tool.check(text)
+    def grammar_checker(self):
+        grammar_issues = self.tool.check(self.message)
         return len(grammar_issues)
 
-    def flesch_reading_ease(self, text):
-        sentences = re.split(r'[.!?]', text)
+    def flesch_reading_ease(self):
+        sentences = re.split(r'[.!?]', self.message)
         sentence_lengths = [len(re.findall(r'\b\w+\b', sentence)) for sentence in sentences if sentence.strip()]
         avg_sentence_length = sum(sentence_lengths) / len(sentence_lengths) if len(sentence_lengths) > 0 else 0
 
-        words = re.findall(r'\b\w+\b', text)
+        words = re.findall(r'\b\w+\b', self.message)
         total_syllables = sum(textstat.syllable_count(word) for word in words)
         avg_syllables_per_word = total_syllables / len(words) if len(words) > 0 else 0
 
         flesch_score = 206.835 - (1.015 * avg_sentence_length) - (84.6 * avg_syllables_per_word)
-        return min(flesch_score, 100)
+        return min(round(flesch_score), 100)
 
-    def analyze_text_with_perspective(self, text):
+    def toxicity_score(self):
         endpoint = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze"
 
         params = {"key": self.api_key}
         data = {
-            "comment": {"text": text},
+            "comment": {"text": self.message},
             "languages": ["en"],
             "requestedAttributes": {
                 "TOXICITY": {},
-                "SPAM": {},
-                "INSULT": {},
-                "INCOHERENT": {},
             },
         }
 
@@ -99,38 +98,69 @@ class EmailAnalyzer:
         results = response.json()
 
         toxicity_score = results["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
+
+        return round(toxicity_score,2)
+
+    def spam_score(self):
+        endpoint = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze"
+
+        params = {"key": self.api_key}
+        data = {
+            "comment": {"text": self.message},
+            "languages": ["en"],
+            "requestedAttributes": {
+                "SPAM": {},
+            },
+        }
+
+        response = requests.post(endpoint, params=params, json=data)
+        results = response.json()
+
         spam_score = results["attributeScores"]["SPAM"]["summaryScore"]["value"]
+
+        return round(spam_score,2)
+
+    def incoherence_score(self):
+        endpoint = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze"
+
+        params = {"key": self.api_key}
+        data = {
+            "comment": {"text": self.message},
+            "languages": ["en"],
+            "requestedAttributes": {
+                "INCOHERENT": {},
+            },
+        }
+
+        response = requests.post(endpoint, params=params, json=data)
+        results = response.json()
+
         incoherent_score = results["attributeScores"]["INCOHERENT"]["summaryScore"]["value"]
 
-        return toxicity_score, spam_score, incoherent_score
+        return round(incoherent_score,2)
 
-    def calculate_risk_score(self, text):
+    def calculate_risk_score(self):
 
-        toxicity_score, spam_score, incoherent_score = self.analyze_text_with_perspective(text)
-
-        if self.detect_phishing(text):
+        if self.detect_phishing():
             return 100
-        elif self.detect_spam(text):
-            return round(100*spam_score)
+        elif self.detect_spam():
+            return round(100*self.spam_score())
 
         else:
             lexical_diversity_weight = 0.1
             flesch_reading_ease_weight = 0.1
-            links_weight = 0.3 if len(self.included_urls(text)) else 0
+            links_weight = 0.3 if len(self.included_urls()) else 0
             toxicity_score_weight = 0.1
             spam_score_weight = 0.3
             incoherent_score_weight = 0.1
 
-            lexical_diversity_score = self.lexical_diversity(text)
-            flesch_reading_ease_score = self.flesch_reading_ease(text)/100
-
             risk_score = (
-                    lexical_diversity_score * lexical_diversity_weight +
-                    flesch_reading_ease_score * flesch_reading_ease_weight +
+                    self.lexical_diversity() * lexical_diversity_weight +
+                    (self.flesch_reading_ease()/100) * flesch_reading_ease_weight +
                     links_weight +
-                    toxicity_score * toxicity_score_weight +
-                    spam_score * spam_score_weight +
-                    incoherent_score * incoherent_score_weight
+                    self.toxicity_score() * toxicity_score_weight +
+                    self.spam_score() * spam_score_weight +
+                    self.incoherence_score() * incoherent_score_weight
             )
 
             return round(risk_score*100)

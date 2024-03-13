@@ -1,24 +1,21 @@
 from flask import request, url_for, session, Blueprint, render_template, redirect, flash
+from functools import wraps
+from ShieldMail.src.models.forms import LoginForm,SignupForm
 import requests
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, EqualTo, Email
+from datetime import datetime
+
 from main import db, oauth, bcrypt
 
 auth = Blueprint("auth", __name__)
 
-class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
-
-class SignupForm(FlaskForm):
-    firstname = StringField('First Name', validators=[DataRequired()])
-    lastname = StringField('Last Name', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Sign Up')
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            flash('Please log in to access this page.')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -32,15 +29,14 @@ def login():
 
         user = db.users.find_one({'email': email})
 
-        if user is None:
-            flash('Invalid email or password')
-            return redirect(url_for('auth.login'))
-        
-        elif 'password' in user:
+        if user:
             if bcrypt.check_password_hash(user['password'], password):
                 session['user'] = {'email': user['email']}
+                db.users.update_one({'email': email}, {'$set': {'lastLogin': datetime.now()}})
                 return redirect(url_for('core.dashboard'))
-        
+            else:
+                flash('Invalid email or password')
+                return redirect(url_for('auth.login'))
         else:
             flash('Invalid email or password')
             return redirect(url_for('auth.login'))
@@ -67,7 +63,9 @@ def googleCallback():
         user = {
             'firstname': firstname,
             'lastname': lastname,
-            'email': email
+            'email': email,
+            'lastLogin': datetime.now(),
+            'memberSince': datetime.now()
             }
         db.users.insert_one(user)
 
@@ -115,6 +113,8 @@ def signup():
                 'lastname': lastname,
                 'email': email,
                 'password': hashed_password,
+                'lastLogin': datetime.now(),
+                'memberSince': datetime.now()
             })
 
             flash('Registered successfully')

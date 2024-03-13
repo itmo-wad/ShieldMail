@@ -25,11 +25,15 @@
         <div class="option-description">Check emails for spam and phishing threats</div>
     </div>
     <div class="dashboard-option">
-        <a href="{{ url_for('core.maliciousUrl') }}" class="option-title">Malicious Link Detector</a>
+        <a href="{{ url_for('core.maliciouslinkcheck') }}" class="option-title">Malicious Link Detector</a>
         <div class="option-description">Analyze links for potential security threats</div>
     </div>
     <div class="dashboard-option">
-        <a href="{{ url_for('core.history') }}" class="option-title">History of Checks</a>
+        <a href="{{ url_for('core.historyLink') }}" class="option-title">History of Link Checks</a>
+        <div class="option-description">A glance at your recent security scans.</div>
+    </div>
+    <div class="dashboard-option">
+        <a href="{{ url_for('core.historyMessage') }}" class="option-title">History of Email Checks</a>
         <div class="option-description">A glance at your recent security scans.</div>
     </div>
 </div>

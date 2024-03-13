@@ -19,22 +19,34 @@
 
     <div class="container">
         <h1>Report History</h1>
-        {% for url in urls %}
+        {% for email in emails %}
         <div class="history-row">
-            <div class="report-detail link-column">
-                <p>Checked Link:</p>
-                <a href="{{ url.maliciousLink }}" class="link" target="_blank">{{ url.maliciousLink }}</a>
+            <div class="report-detail status-column">
+                <p>
+                    Risk Score:
+                    <span class="{{ 'status-true' if email.riskScore else 'status-false' }}">
+                        {{ email.riskScore }}
+                    </span>
+                </p>
             </div>
             <div class="report-detail status-column">
                 <p>
-                    Status:
-                    <span class="{{ 'status-true' if url.isMalicious else 'status-false' }}">
-                        {{ 'True' if url.isMalicious else 'False' }}
+                    Spam Detected:
+                    <span class="{{ 'status-true' if email.spamDetected else 'status-false' }}">
+                        {{ 'True' if email.spamDetected else 'False' }}
+                    </span>
+                </p>
+            </div>
+            <div class="report-detail status-column">
+                <p>
+                    Phishing Detected:
+                    <span class="{{ 'status-true' if email.phishingDetected else 'status-false' }}">
+                        {{ 'True' if email.phishingDetected else 'False' }}
                     </span>
                 </p>
             </div>
             <div class="report-detail date-column">
-                <p>Date Checked: {{ url.dateChecked }}</p>
+                <p>Date Checked: {{ email.createdAt }}</p>
             </div>
         </div>
         {% endfor %}

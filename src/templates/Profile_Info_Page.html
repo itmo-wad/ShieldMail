@@ -18,13 +18,11 @@
 <div class="profile-container">
     <h2 class="profile-header">Profile Information</h2>
     <div class="profile-info">
-        <div><span>First Name:</span> {{ firstname }}</div>
-        <div><span>Last Name:</span> {{ lastname }}</div>
-        <div><span>Email:</span> {{ email }}</div>
-        <!-- Additional information could go here -->
-        <div><span>Member Since:</span> January 2021</div>
-        <div><span>Last Login:</span> 10 days ago</div>
-        <!-- Include other relevant information as needed -->
+        <div><span>First Name:</span> {{ user['firstname'] }}</div>
+        <div><span>Last Name:</span> {{ user['lastname'] }}</div>
+        <div><span>Email:</span> {{ user['email'] }}</div>
+        <div><span>Member Since:</span> {{ user['memberSince'] }}</div>
+        <div><span>Last Login:</span> {{ user['lastLogin'] }} </div>
     </div>
 
  
