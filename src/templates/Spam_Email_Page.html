@@ -21,6 +21,7 @@
 
         <form id="formForMessage" action="/spam-email" method="POST">
             {{ form.hidden_tag() }}
+            {{ form.csrf_token }}
             <p id="contentOfMessage">{{ form.content.label }}<br>{{ form.content() }}</p>
             <p>{{ form.submit() }}</p>
         </form>
