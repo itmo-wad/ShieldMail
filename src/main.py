@@ -23,6 +23,7 @@ app.secret_key = os.urandom(24)
 oauth = OAuth(app)
 
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+RAPID_API_KEY = os.environ.get('RAPID_API_KEY')
 
 oauth.register('shieldmail',
                client_id=os.environ.get('OAUTH2_CLIENT_ID'),

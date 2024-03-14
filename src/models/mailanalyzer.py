@@ -5,9 +5,10 @@ import requests
 import bleach
 
 class EmailAnalyzer:
-    def __init__(self, perspective_api_key,text):
+    def __init__(self, perspective_api_key,rapid_api_key,text):
         self.tool = language_tool_python.LanguageTool('auto')
         self.api_key = perspective_api_key
+        self.api_key2 = rapid_api_key
         self.message = bleach.clean(text)
 
     def included_urls(self):
@@ -16,30 +17,19 @@ class EmailAnalyzer:
         return urls
 
     def detect_phishing(self):
-        endpoint = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
-        api_url = f"{endpoint}?key={self.api_key}"
+        host = "https://exerra-phishing-check.p.rapidapi.com/"
 
         for url in self.included_urls():
-            request_body = {
-                "client": {
-                    "clientId": "wad-itmo-shieldmail",
-                    "clientVersion": "1.0",
-                },
-                "threatInfo": {
-                    "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE"],
-                    "platformTypes": ["ANY_PLATFORM"],
-                    "threatEntryTypes": ["URL"],
-                    "threatEntries": [{"url": url}],
-                },
+            payload = {"url": url}
+            headers = {
+            "X-RapidAPI-Key": self.api_key2,
+            "X-RapidAPI-Host": "exerra-phishing-check.p.rapidapi.com"
             }
-
-            response = requests.post(api_url, json=request_body)
-            response_data = response.json()
-
-            if "matches" in response_data:
-                return True
-
-        return False
+            response = requests.get(host, headers=headers, params=payload)
+            detected = response.json()['data']['isScam']
+            if detected:
+                return detected
+        return detected
 
     def detect_spam(self):
         endpoint = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze"
@@ -164,8 +154,4 @@ class EmailAnalyzer:
             )
 
             return round(risk_score*100)
-
-
-
-
 
