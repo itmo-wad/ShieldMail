@@ -1,6 +1,6 @@
 from flask import request, url_for, session, Blueprint, render_template, redirect, flash
 from functools import wraps
-from ShieldMail.src.models.forms import LoginForm,SignupForm
+from models.forms import LoginForm,SignupForm
 import requests
 from datetime import datetime
 
