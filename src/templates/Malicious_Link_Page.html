@@ -4,94 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/Malicious_Link_Page.css" />
+    <link rel="shortcut icon" type="image/png" href="/static/icon.png"/>
     <title>ShieldMail Link Checker</title>
 </head>
 <body>
 
-    <div class="navbar">
+ <div class="navbar">
         <a href="#" style="font-weight: bold;">ShieldMail</a>
         <a href="{{ url_for('core.dashboard') }}">Dashboard</a>
         <a href="{{ url_for('auth.logout') }}">Logout</a>
     </div>
 
-    <div class="container">
-        <div class="main-content">
-            <h1>Link Checker: Secure Your Browsing!</h1>
-            <p>Enter any link below to check its safety. Our system will analyze it to detect potential security threats. Don't let phishing attempts compromise your security!</p>
-
-            <div class="link-checker-section">
-                <h2>How Our Link Checker Works:</h2>
-                <p>When you submit a link, our system:</p>
-                <ul>
-                    <li>Checks the URL against a database of known phishing sites.</li>
-                    <li>Analyzes the content for suspicious scripts and tokens.</li>
-                    <li>Provides a report on the link's reliability and security.</li>
-                </ul>
-                <p>Protect your personal data and browse the internet with confidence.</p>
-
-                <label for="linkInput">Enter Link to Check:</label>
-                <input type="url" id="linkInput" placeholder="Enter link here" required class="link-input">
-                <button class="cta-button" onclick="checkForMaliciousLink()">Analyze Link</button>
-
-                <div id="linkResults"></div>
-            </div>
-
-            <div class="user-reviews-section">
-                <h2>What Our Users Say:</h2>
-                <blockquote>"ShieldMail's Link Checker has been a game-changer for my online safety. I can now click on links without worry!" - Alex</blockquote>
-                <blockquote>"The detailed reports provided after each scan really help me understand the threats out there." - Sam</blockquote>
-            </div>
+<div class="container">
+    <div class="main-content">
+        <h1>Link Checker: Secure Your Browsing!</h1>
+        <p>Enter any link below to check its safety. Our system will analyze it to detect potential security threats. Don't let phishing attempts compromise your security!</p>
+        
+        <div class="link-checker-section">
+            <h2>How Our Link Checker Works:</h2>
+            <p>When you submit a link, our system:</p>
+            <ul>
+                <li>Checks the URL against a database of known phishing sites.</li>
+                <li>Analyzes the content for suspicious scripts and tokens.</li>
+                <li>Provides a report on the link's reliability and security.</li>
+            </ul>
+            <p>Protect your personal data and browse the internet with confidence.</p>
+            
+            <label for="linkInput">Enter Link to Check:</label>
+            <input type="url" id="linkInput" placeholder="Enter link here" required class="link-input">
+            <button class="cta-button" onclick="checkForMaliciousLink()">Analyze Link</button>
+            <div id="linkError" style="color: red; margin-top: 10px;"></div>
+            <div id="linkResults"></div>
+        </div>
+        
+        <div class="user-reviews-section">
+            <h2>What Our Users Say:</h2>
+            <blockquote>"ShieldMail's Link Checker has been a game-changer for my online safety. I can now click on links without worry!" - Alex</blockquote>
+            <blockquote>"The detailed reports provided after each scan really help me understand the threats out there." - Sam</blockquote>
         </div>
     </div>
+</div>
 
-    <script>
-        function displayLinkResult(isMalicious) {
-            var resultsDiv = document.getElementById('linkResults');
-            resultsDiv.className = isMalicious ? 'result-message is-malicious' : 'result-message not-malicious';
-            var resultMessage = isMalicious ? "Warning: This link is considered dangerous!" : "This link is considered safe.";
-            resultsDiv.innerHTML = `<p>${resultMessage}</p>`;
-            resultsDiv.style.display = 'block';
-            resultsDiv.style.opacity = 0;
-            animateElement(resultsDiv, 'fadeIn', '0.5s', '0s');
+<div id="loadingSpinner" class="loading-spinner" style="display: none;">
+
+<script>
+    function displayLinkResult(isMalicious) {
+        var resultsDiv = document.getElementById('linkResults');
+        resultsDiv.className = isMalicious ? 'result-message is-malicious' : 'result-message not-malicious';
+        var resultMessage = isMalicious ? "Warning: This link is considered dangerous!" : "This link is considered safe.";
+        resultsDiv.innerHTML = `<p>${resultMessage}</p>`;
+        resultsDiv.style.display = 'block';
+        resultsDiv.style.opacity = 1;
+        animateElement(resultsDiv, 'fadeIn', '0.5s', '0s');
+    }
+
+    function displaySpinner(show) {
+        document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+    }
+
+    function hideLinkResult() {
+        var resultsDiv = document.getElementById('linkResults');
+        animateElement(resultsDiv, 'fadeOut', '0.5s', '0s');
+        setTimeout(function() {
+            resultsDiv.style.display = 'none';
+            resultsDiv.innerHTML = ''; // Additionally clear the content
+        }, 500);
+    }
+
+    function checkForMaliciousLink() {
+        var link = document.getElementById('linkInput').value.trim();
+        var errorDiv = document.getElementById('linkError');
+        errorDiv.textContent = ''; // Clear previous error message
+
+        if (!link) {
+            errorDiv.textContent = 'Please enter a link to analyze.';
+            hideLinkResult(); // Hide previous results when input is empty
+            return; // Exit if input is empty
         }
 
-        function hideLinkResult() {
-            var resultsDiv = document.getElementById('linkResults');
-            animateElement(resultsDiv, 'fadeOut', '0.5s', '0s');
-            setTimeout(function() {
-                resultsDiv.style.display = 'none';
-            }, 500); // Ensure this matches the duration of the fadeOut animation
+        // Simplified URL validation regex
+        var urlPattern = /^(https?:\/\/)?[\w.-]+\.[\w.-]+(\S+)?$/;
+        if (!urlPattern.test(link)) {
+            errorDiv.textContent = 'Please enter a valid link to analyze.';
+            hideLinkResult(); // Hide previous results when input is not a valid URL
+            return; // Exit if input is not a valid URL
         }
+        displaySpinner(true);
+        // If the input passes validation, proceed to hide previous results and send the request
+        hideLinkResult(); // Optionally, you can decide to hide results here or only clear them on successful validation
+        
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/maliciouslinkcheck', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-        function checkForMaliciousLink() {
-            hideLinkResult();
-            var link = document.getElementById('linkInput').value;
+        xhr.onload = function() {
+            displaySpinner(false);
+            if (xhr.status >= 200 && xhr.status < 300) {
+                var response = JSON.parse(xhr.responseText);
+                displayLinkResult(response.isMalicious);
+            } else {
+                console.error('Request failed with status:', xhr.status);
+                errorDiv.textContent = 'An error occurred. Please try again.';
+            }
+        };
 
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/maliciouslinkcheck', true); // Update this URL to where you want to send the POST request
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.send(JSON.stringify({ link: link }));
+    }
 
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    var response = JSON.parse(xhr.responseText);
-                    displayLinkResult(response.isMalicious);
-                } else {
-                    console.error('Request failed with status:', xhr.status);
-                }
-            };
+    function animateElement(element, animationName, duration, delay) {
+        element.style.animationName = animationName;
+        element.style.animationDuration = duration;
+        element.style.animationDelay = delay;
+        element.style.animationFillMode = 'forwards';
+    }
+</script>
 
-            var data = JSON.stringify({ link: link });
-            xhr.send(data);
-        }
-
-        function animateElement(element, animationName, duration, delay) {
-            element.style.animationName = animationName;
-            element.style.animationDuration = duration;
-            element.style.animationDelay = delay;
-            element.style.animationFillMode = 'forwards';
-        }
-    </script>
 
 </body>
 </html>
