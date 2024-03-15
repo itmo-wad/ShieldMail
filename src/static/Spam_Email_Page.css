@@ -49,7 +49,7 @@ html, body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     width: 80%;
     max-width: 900px;
-    margin: auto; /* Centers the main content on the page */
+    margin: auto;
 }
 
 /* Call-to-Action Button Styles */
@@ -83,16 +83,9 @@ html, body {
     .main-content {
         width: 95%;
     }
-    .button-container {
-        display: flex;
-        justify-content: center;
-        gap: 10px; /* Adjust the gap between buttons as needed */
-    }
 }
 
 /* Additional Styles for the Spam Checker Page */
-/* You might not need any additional styles, but if you do, you can add them here */
-/* For example, to style the textarea and result display */
 textarea {
     width: 100%;
     height: 150px;
@@ -100,73 +93,257 @@ textarea {
     border: 1px solid #ced4da;
     border-radius: 4px;
     margin-top: 15px;
-    resize: vertical; /* Allows the user to resize the textarea vertically */
+    resize: vertical;
 }
 
 #results {
-    display: none; /* Hide results initially */
+    display: none;
+    opacity: 0;
     padding: 10px;
     margin-top: 20px;
-    background-color: #e9ecef;
+    /*color: #3c763d;*/
     border-radius: 4px;
-    border: 1px solid #ced4da;
+    /*border: 1px solid #d6e9c6; background-color: green;*/
+    transition: opacity 0.5s ease;
 }
 
-/* Add this style in your <style> tag or CSS file */
-.modal {
-    display: none;
-    position: fixed;
-    top: 10%;
-    left: 20%;
-    width: 60%;
-    height: 75%;
-    background-color: rgba(0, 0, 0, 0.4);
+#results.error {
+    background-color: #f2dede;
+    color: #a94442;
+    border: 1px solid #ebccd1;
+}
+
+#results p {
+    margin: 0;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Styles for guidance text */
+.guide-text p {
+    color: #6c757d;
+    font-size: 0.95em;
+}
+
+/* Animation for result display */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.results-slide-in {
+    animation: slideIn 0.5s ease forwards;
+}
+
+
+.brand-logo {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.intro {
+    margin-bottom: 2rem;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.guidance {
+    text-align: left;
+    background: #fff;
+    padding: 2rem;
+    margin-top: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 1s ease-out;
+}
+
+.guidance h2 {
+    color: #3498db;
+    font-weight: 600;
+}
+
+.guidance p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+.guidance ul {
+    list-style-type: disc;
+    margin-left: 2rem;
+}
+
+.results {
+    min-height: 50px;
+    display: flex;
     justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 1rem;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Style for non-spam results */
+/* Style for non-spam results */
+/* Style for non-spam results */
+.not-spam {
+    background-color: #dff0d8; /* Light green */
+    color: green; /* Dark gray */
+    border: 1px solid #d6e9c6;
+}
+
+
+/* Style for spam results */
+.is-spam {
+    background-color: #f2dede; /* Light red */
+    color: #a94442; /* Dark red */ 
+    border: 1px solid #ebccd1;
+}
+
+#results p {
+    margin: 0;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 5px; /* Add some spacing between paragraphs */
+}
+
+#results p:not(:first-child) {
+    font-weight: normal; /* Make additional info paragraphs regular weight */
+}
+
+.attribute-container {
+    background-color: #fff;
+    padding: 10px;
+    margin: 10px 0;
+    border-left: 4px solid #3498db;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+
+.attribute-name {
+    font-weight: bold;
+    color: #3498db;
+    display: flex;
     align-items: center;
 }
 
-.modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-}
-
-.close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 40px;
-    font-weight: bold;
-    cursor: pointer;
-}
-.modal-title {
+.attribute-value {
     font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 15px;
+    color: #333;
+    font-weight: normal;
+    margin-left: 5px;
 }
-/* Add these styles to your existing stylesheet or create a new one */
 
-/* Container for the modal */
+/* Example of a color code for the risk score */
+#risk-score {
+    color: #e74c3c; /* Red for high risk */
+}
 
-/* Metric rows and rectangles */
-.metric-row {
+#phishing-detected {
+    color: #2ecc71; /* Green for safe */
+}
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Animation classes */
+.fade-in-up {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+.result-rectangles {
     display: flex;
-    margin-bottom: 10px;
+    justify-content: space-evenly;
+    margin-bottom: 20px;
 }
 
-.metric-rectangle {
-    flex: 1;
-    margin-right: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.rectangle {
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 20px;
+    width: 30%; /* Adjust as needed */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
 }
 
-/* Individual metrics */
-.metric {
-    margin-right: 10px;
+.rectangle-title {
+    color: #7f8c8d;
+    font-size: 1em;
 }
 
-/* Additional styling for the whole modal content if needed */
+.rectangle-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 10px;
+}
 
+.metric-scores {
+    width: 100%;
+    text-align: center;
+}
 
+/* Hover effect for rectangles */
+.rectangle:hover {
+    transform: translateY(-10px);
+}
+
+/* Add more styles as needed */
+/* Add this to your CSS file */
+.loading-spinner {
+    position: absolute; /* or absolute */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+    z-index: 100;
+  }
+
+  /* Add this to your CSS file */
+
+/* Add this to your CSS file */
+.container, .main-content {
+    position: relative;
+    /* Rest of your styling */
+}
+
+  
+  @keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  
