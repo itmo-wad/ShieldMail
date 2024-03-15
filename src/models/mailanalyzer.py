@@ -60,17 +60,17 @@ class EmailAnalyzer:
         grammar_issues = self.tool.check(self.message)
         return len(grammar_issues)
 
-    def flesch_reading_ease(self):
-        sentences = re.split(r'[.!?]', self.message)
+    def flesch_reading_ease(self, text):
+        sentences = re.split(r'[.!?]', text)
         sentence_lengths = [len(re.findall(r'\b\w+\b', sentence)) for sentence in sentences if sentence.strip()]
         avg_sentence_length = sum(sentence_lengths) / len(sentence_lengths) if len(sentence_lengths) > 0 else 0
 
-        words = re.findall(r'\b\w+\b', self.message)
+        words = re.findall(r'\b\w+\b', text)
         total_syllables = sum(textstat.syllable_count(word) for word in words)
         avg_syllables_per_word = total_syllables / len(words) if len(words) > 0 else 0
 
         flesch_score = 206.835 - (1.015 * avg_sentence_length) - (84.6 * avg_syllables_per_word)
-        return min(round(flesch_score), 100)
+        flesch_score = round(min(flesch_score, 100), 2)
 
     def toxicity_score(self):
         endpoint = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze"
