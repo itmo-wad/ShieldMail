@@ -3,94 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/Spam_Email_Page.css" />
     <title>Spam Content Checker | ShieldMail</title>
+    <link rel="shortcut icon" type="image/png" href="/static/icon.png"/>
+    <link rel="stylesheet" href="/static/Spam_Email_Page.css">
 </head>
 <body>
 
-    <div class="navbar">
+      <div class="navbar">
         <a href="#" style="font-weight: bold;">ShieldMail</a>
         <a href="{{ url_for('core.dashboard') }}">Dashboard</a>
         <a href="{{ url_for('auth.logout') }}">Logout</a>
     </div>
 
-<div class="container">
-    <div class="main-content">
-        <h1>Check Your Email for Spam</h1>
-        <p>Paste the content of a suspicious email below to check if it's spam. Our advanced algorithms analyze the text to detect potential threats and keep your inbox safe.</p>
-
-        <form id="formForMessage" action="/spam-email" method="POST">
-            {{ form.hidden_tag() }}
-            {{ form.csrf_token }}
-            <p id="contentOfMessage">{{ form.content.label }}<br>{{ form.content() }}</p>
-            <p>{{ form.submit() }}</p>
-        </form>
-    </div>
-</div>
-<div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div id="modalContent">
+    <div class="container">
+        <div class="main-content">
+            <h1>Check Your Email for Spam</h1>
+            <p>Paste the content of a suspicious email below to check if it's spam. Our advanced algorithms analyze the text to detect potential threats and keep your inbox safe.</p>
+            <textarea id="emailContent" placeholder="Paste email content here" rows="10"></textarea>
+            <button class="cta-button" onclick="checkForSpam()">Check for Spam</button>
+            <div id="guide-text" class="guide-text">
+                <p>Not sure about an email? Paste it above and click "Check for Spam". We'll analyze it for known spam indicators and suspicious links.</p>
+                <p>Tip: Look for odd sender addresses, urgent or threatening language, and unexpected attachments. These can be signs of spam.</p>
             </div>
+            <div id="error-message" style="color: red; margin-top: 20px;"></div>
+
+            <div id="results">
+                <p id="result-message"></p>
+                <div class="result-rectangles">
+                    <div class="rectangle" id="total-risk-score-container">
+                        <p class="rectangle-title">Total Risk Score</p>
+                        <p class="rectangle-value" id="total-risk-score"></p>
+                    </div>
+                    <div class="rectangle" id="spam-status-container">
+                        <p class="rectangle-title">Spam Status</p>
+                        <p class="rectangle-value" id="spam-status"></p>
+                    </div>
+                    <div class="rectangle" id="phishing-status-container">
+                        <p class="rectangle-title">Phishing Status</p>
+                        <p class="rectangle-value" id="phishing-status"></p>
+                    </div>
+                    <div class="rectangle" id="phishing-status-container">
+                        <p class="rectangle-title">flesch_reading_ease</p>
+                        <p class="rectangle-value" id="phishing-status"></p>
+                    </div>analyze_text_with_perspective
+                    <div class="rectangle" id="phishing-status-container">
+                        <p class="rectangle-title">analyze_text_with_perspective</p>
+                        <p class="rectangle-value" id="phishing-status"></p>
+                    </div>
+                    <div class="rectangle" id="phishing-status-container">
+                        <p class="rectangle-title">Spam Score:</p>
+                        <p class="rectangle-value" id="phishing-status"></p>
+                    </div>
+                </div>
+            </div>
+            
         </div>
     </div>
+    <!-- Add this before the closing body tag -->
+<div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
+
+    <script>
+        function displayResult(response) {
+            displaySpinner(false);
+            var resultsDiv = document.getElementById('results');
+            resultsDiv.className = response.result? 'is-spam' : 'not-spam';
+        
+            var resultMessage = response.result ? "The email content is considered spam." : "The email content is not considered spam.";
+            var additionalInfo = `
+                <p>Risk Score: ${response.risk_score}</p>
+                <p>Phishing Detected: ${response.phishing_detected ? 'true' : 'false'}</p>
+                <p>Spam Detected: ${response.spam_detected}</p>
+                <p>Lexical Diversity: ${response.lexical_diversity_score}</p>
+                <p>Grammar Issues: ${response.grammar_issues_count}</p>
+                <p>Flesch Reading Ease: ${response.reading}</p>
+                <p>Toxicity Score: ${response.toxicity_score}</p>
+                <p>Spam Score: ${response.Spam_Score}</p>
+                <p>Incoherent Score: ${response.incoherent_score}</p>
+
+
+            `;
+            resultsDiv.innerHTML = `<p>${resultMessage}</p>` + additionalInfo;
+            resultsDiv.style.display = 'block';
+            resultsDiv.style.opacity = 1;
+            animateElement(resultsDiv, 'slideIn', '0.5s', '0s');
+            const attributeContainers = document.querySelectorAll('.attribute-container');
+    
+            // Apply the animation class with a staggered delay
+            attributeContainers.forEach((container, index) => {
+                setTimeout(() => {
+                    container.classList.add('fade-in-up');
+                }, index * 200); // Stagger the animation of each attribute
+            });
+            
+        }
+        
+        
+
+        function hideResult() {
+            var resultsDiv = document.getElementById('results');
+            resultsDiv.style.opacity = 0;
+            setTimeout(function() {
+                resultsDiv.style.display = 'none';
+            }, 500); // Match the duration of the opacity transition
+        }
+
+        function checkForSpam() {
+            var emailContent = document.getElementById('emailContent').value.trim();
+            var errorMessageDiv = document.getElementById('error-message'); // Ensure this div exists in your HTML
+        
+            // Reset any previous error messages and results
+            errorMessageDiv.textContent = '';
+            displaySpinner(true);
+            hideResult();
+        
+            // Basic input validation
+            if (!emailContent) {
+                errorMessageDiv.textContent = "Please enter some content before checking for spam.";
+                displaySpinner(false);
+                return; // Stop execution if the content is empty
+            }
+        
+            // Simple URL detection
+           /* var urlPattern = /https?:\/\/\S+/;
+            if (!urlPattern.test(emailContent)) {
+                errorMessageDiv.textContent = "No URL detected in the content. Please include at least one URL.";
+                displaySpinner(false);
+                return; // Stop execution if no URL is detected
+            }*/
+        
+            // Proceed with making the AJAX request to the server if validations pass
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/emailcheckbutton', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    displaySpinner(false); // Hide spinner once request is complete
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        console.log(response);
+                        displayResult(response);
+                    } else if (xhr.status === 400) {
+                        // Handle client-side validation errors echoed back from the server
+                        var response = JSON.parse(xhr.responseText);
+                        errorMessageDiv.textContent = response.error || "An error occurred. Please check your content and try again.";
+                    } else {
+                        console.error('Error in AJAX request');
+                        errorMessageDiv.textContent = "An unexpected error occurred. Please try again.";
+                    }
+                }
+            };
+            var data = JSON.stringify({ content: emailContent });
+            xhr.send(data);
+        }
+        
+
+
+        function animateElement(element, animation, duration, delay) {
+            element.style.animationName = animation;
+            element.style.animationDuration = duration;
+            element.style.animationDelay = delay;
+            element.style.animationFillMode = 'forwards';
+        }
+
+        function displaySpinner(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+          }
+    </script>
+
 </body>
-
-
-<script>
-document.getElementById('formForMessage').addEventListener('submit', function (event) {
-        event.preventDefault();
-        showLoadingIndicator();
-        const formData = new FormData(event.target)
-        openModal(formData);
-    });
-function showLoadingIndicator() {
-    document.getElementById('modalContent').innerHTML = 'Loading...';
-    document.getElementById('myModal').style.display = 'flex';
-}
-
-function openModal(formData) {
-            fetch('/spam-email', {
-                method: 'POST',
-                body: formData,
-            })
-                .then(response => response.json())
-                .then(data => {
-                    const htmlContent = `
-            <div class="modal-title">Email Analysis Report</div>
-            <div class="metric-row">
-                <div class="metric-rectangle">Risk Score: ${data.riskScore}</div>
-                <div class="metric-rectangle">Phishing Detected: ${data.phishingDetected}</div>
-                <div class="metric-rectangle">Spam Detected: ${data.spamDetected}</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric">Lexical Diversity: ${data.lexicalDiversity}</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric">Grammar Issues: ${data.grammarIssues}</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric">Flesch Reading Ease: ${data.fleschReadingEase}</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric">Toxicity Score: ${data.toxicityScore}</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric">Spam Score: ${data.spamScore}</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric">Incoherent Score: ${data.incoherentScore}</div>
-            </div>
-        `;
-                    document.getElementById('modalContent').innerHTML = htmlContent;
-                    document.getElementById('myModal').style.display = 'flex';
-                });
-        }
-
-function closeModal() {
-            document.getElementById('myModal').style.display = 'none';
-        }
-</script>
-
-
 </html>
