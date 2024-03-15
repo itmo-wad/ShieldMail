@@ -116,6 +116,20 @@ html, body {
     color: #3c763d;
     border: 1px solid #d6e9c6;
 }
+.loading-spinner {
+    position: absolute; /* or absolute */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+    z-index: 100;
+  }
+
 
 /* Animation Keyframes */
 @keyframes fadeIn {
